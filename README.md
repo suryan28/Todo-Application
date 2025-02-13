@@ -57,4 +57,6 @@ This is a simple Todo application built using Django, a high-level Python web fr
 3. Once logged in, you can **create new tasks** by entering a title and clicking the "Add" button.
 4. **Update or delete** existing tasks using the provided options.
 5. **Log out** when you're done using the application.
+   
+![Screenshot 2025-02-14 004626](https://github.com/user-attachments/assets/26da836b-003c-492c-b2c4-e331a92eb19c)
 
