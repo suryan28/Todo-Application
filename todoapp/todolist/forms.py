@@ -27,7 +27,7 @@ class TaskForm(forms.ModelForm):
         widget=forms.TextInput(
             attrs={
                 "class": "form-control form-control-lg",
-                "placeholder": "Enter task...",
+                "placeholder": "What’s on your mind today?",
             }
         ),
     )
