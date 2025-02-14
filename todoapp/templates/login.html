@@ -1,33 +1,60 @@
-
-
-<!-- login.html -->
 {% extends 'base.html' %}
 
-{% block title %}
-Login -
-{% endblock title %}
+{% block title %}Login -{% endblock title %}
 
 {% block content %}
-<br>
-<br>
-<br>
-<div class="card mx-auto mt-5" style="max-width: 400px;">
-    <div class="card-header">
-        <h1 class="text-center">Login</h1>
-    </div>
-    <div class="card-body text-center">
-        <form method="post">
-            {% csrf_token %}
-            <div class="mb-3">
-                {{ form.username.label_tag }}
-                {{ form.username }}
-            </div>
-            <div class="mb-3">
-                {{ form.password.label_tag }}
-                {{ form.password }}
-            </div>
-            <button type="submit" class="btn btn-primary">Login</button>
-        </form>
+<div class="container d-flex justify-content-center align-items-center" style="height: 90vh;">
+    <div class="card shadow-lg p-4 border-0" style="max-width: 380px; width: 100%; border-radius: 12px;">
+        <div class="card-header bg-primary text-white text-center py-3 rounded-top">
+            <h3 class="mb-0 fw-bold">Welcome Back 👋</h3>
+            <p class="mb-0 text-light small">Login to continue</p>
+        </div>
+        <div class="card-body">
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+
+                <!-- Username -->
+                <div class="mb-3">
+                    <label for="id_username" class="form-label fw-semibold">Username</label>
+                    <input type="text" name="username" id="id_username" class="form-control rounded-3" placeholder="Enter your username" required>
+                </div>
+
+                <!-- Password -->
+                <div class="mb-3">
+                    <label for="id_password" class="form-label fw-semibold">Password</label>
+                    <div class="input-group">
+                        <input type="password" name="password" id="id_password" class="form-control rounded-start" placeholder="Enter your password" required>
+                        <button class="btn btn-outline-secondary rounded-end" type="button" id="togglePassword">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary fw-bold shadow-sm">Login</button>
+                </div>
+
+                <!-- Forgot Password & Signup Links -->
+                <div class="text-center mt-3">
+                    <a href="{% url 'register' %}" class="text-muted small">New here? Create an account</a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
+
+<!-- JavaScript for Password Toggle -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const togglePassword = document.getElementById("togglePassword");
+        const passwordInput = document.getElementById("id_password");
+
+        togglePassword.addEventListener("click", function () {
+            passwordInput.type = passwordInput.type === "password" ? "text" : "password";
+            this.querySelector("i").classList.toggle("bi-eye");
+            this.querySelector("i").classList.toggle("bi-eye-slash");
+        });
+    });
+</script>
 {% endblock content %}

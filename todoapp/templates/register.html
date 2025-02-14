@@ -1,60 +1,81 @@
-<!-- registration_form.html -->
-{% extends 'base.html' %} {% block title %} Register - {% endblock title %} 
-{% block content %}
-<br />
-<br />
-<br />
-<div class="card mx-auto mt-5" style="max-width: 500px">
-  <div class="card-header">
-    <h1 class="text-center">Register</h1>
-  </div>
+{% extends 'base.html' %} 
 
-  <div class="card-body">
-    <form method="post" id="registration-form">
-        {% csrf_token %}
-        <div class="row mb-3">
-            <div class="col">
-                <label for="id_username" class="form-label">{{ form.username.label }}</label>
-                {{ form.username }}
-            </div>
+{% block title %} Register - {% endblock title %} 
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh; margin-top: 20px;">
+    <div class="card shadow-lg p-4 border-0" style="max-width: 400px; width: 100%; border-radius: 12px;">
+        <div class="card-header bg-primary text-white text-center py-3 rounded-top">
+            <h3 class="mb-0 fw-bold">Create an Account 🎉</h3>
+            <p class="mb-0 text-light small">Sign up to get started</p>
         </div>
-        <div class="row mb-3">
-            <div class="col">
-                <label for="id_email" class="form-label">{{ form.email.label }}</label>
-                {{ form.email }}
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col">
-                <label for="id_password" class="form-label">{{ form.password.label }}</label>
-                {{ form.password }}
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col">
-                <label for="id_confirm_password" class="form-label">{{ form.confirm_password.label }}</label>
-                {{ form.confirm_password }}
-                <div id="password-error" class="text-danger" style="display: none;">Passwords do not match.</div>
+
+        <div class="card-body">
+            <form method="post" id="registration-form" class="needs-validation" novalidate>
+                {% csrf_token %}
+
+                <!-- Username -->
+                <div class="mb-3">
+                    <label for="id_username" class="form-label fw-semibold">Username</label>
+                    <input type="text" name="username" id="id_username" class="form-control rounded-3" placeholder="Enter username" required>
+                </div>
+
+                <!-- Email -->
+                <div class="mb-3">
+                    <label for="id_email" class="form-label fw-semibold">Email</label>
+                    <input type="email" name="email" id="id_email" class="form-control rounded-3" placeholder="Enter email" required>
+                </div>
+
+                <!-- Password -->
+                <div class="mb-3">
+                    <label for="id_password" class="form-label fw-semibold">Password</label>
+                    <div class="input-group">
+                        <input type="password" name="password" id="id_password" class="form-control rounded-start" placeholder="Enter password" required>
+                        <button class="btn btn-outline-secondary rounded-end" type="button" id="togglePassword">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="mb-3">
+                    <label for="id_confirm_password" class="form-label fw-semibold">Confirm Password</label>
+                    <div class="input-group">
+                        <input type="password" name="confirm_password" id="id_confirm_password" class="form-control rounded-start" placeholder="Re-enter password" required>
+                        <button class="btn btn-outline-secondary rounded-end" type="button" id="toggleConfirmPassword">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <div id="password-error" class="text-danger small mt-1" style="display: none;">Passwords do not match.</div>
+                </div>
+
                 {% if user_exists_error %}
-        <div id="user-exists-error" class="text-danger">{{ user_exists_error }}</div>
-    {% endif %}
-            </div>
+                <div class="alert alert-danger p-2">{{ user_exists_error }}</div>
+                {% endif %}
+
+                <!-- Submit Button -->
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary fw-bold shadow-sm">Register</button>
+                </div>
+
+                <!-- Login Redirect -->
+                <div class="text-center mt-3">
+                    <a href="{% url 'login' %}" class="text-muted small">Already have an account? Log in</a>
+                </div>
+            </form>
         </div>
-        <div class="row mb-3">
-            <div class="col text-center">
-                <button type="submit" class="btn btn-primary" id="register-button">Register</button>
-            </div>
-        </div>
-    </form>
+    </div>
 </div>
 
+<!-- JavaScript -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const form = document.getElementById('registration-form');
         const passwordInput = document.getElementById('id_password');
         const confirmPasswordInput = document.getElementById('id_confirm_password');
         const passwordError = document.getElementById('password-error');
-        const userExistsError = document.getElementById('user-exists-error');
+        const togglePassword = document.getElementById("togglePassword");
+        const toggleConfirmPassword = document.getElementById("toggleConfirmPassword");
 
         form.addEventListener('submit', function (event) {
             if (passwordInput.value !== confirmPasswordInput.value) {
@@ -64,15 +85,18 @@
         });
 
         confirmPasswordInput.addEventListener('input', function () {
-            if (passwordInput.value === confirmPasswordInput.value) {
-                passwordError.style.display = 'none';
-            } else {
-                passwordError.style.display = 'block';
-            }
+            passwordError.style.display = passwordInput.value === confirmPasswordInput.value ? 'none' : 'block';
         });
 
-
+        // Toggle password visibility
+        [togglePassword, toggleConfirmPassword].forEach((toggle, index) => {
+            toggle.addEventListener("click", function () {
+                const targetInput = index === 0 ? passwordInput : confirmPasswordInput;
+                targetInput.type = targetInput.type === "password" ? "text" : "password";
+                this.querySelector("i").classList.toggle("bi-eye");
+                this.querySelector("i").classList.toggle("bi-eye-slash");
+            });
+        });
     });
 </script>
-
 {% endblock content %}

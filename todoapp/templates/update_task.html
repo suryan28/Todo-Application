@@ -1,28 +1,53 @@
 {% extends 'base.html' %}
 
-{% block title %}
-Update Task -
-{% endblock title %}
+{% block title %} Update Task {% endblock title %}
 
 {% block content %}
-<div class="card">
-    <div class="card-header">
-        <h1 class="text-center">OK's Todo</h1>
-    </div>
-    <div class="card-body">
-        <form method="post">
-            {% csrf_token %}
+<div class="container mt-5">
+    <div class="card shadow-lg border-0 rounded-4" style="background-color: #ffffff;">
+        <div class="card-header text-white text-center py-4 rounded-top-4" 
+             style="background: linear-gradient(135deg, #517da3, #60a16e);">
+            <h2 class="mb-0 fw-bold">Refine & Complete Your Task! 🚀</h2>
+            <p class="mb-0 text-light">Make changes or mark it as done.</p>
+        </div>
 
-            <div class="input-group mb-3">
-                <div class="input-group-text" data-toggle="tooltip" data-placement="bottom" title="Marked as completed">
-                    {{task_edit_form.completed}}
+        <div class="card-body">
+            <form method="post" id="updateTaskForm">
+                {% csrf_token %}
+                
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Task Title</label>
+                    {{ task_edit_form.title }}
+                    <div class="invalid-feedback">Task title cannot be empty.</div>
                 </div>
-                {{task_edit_form.title}}
-                <button type="submit" class="btn btn-lg btn-info">Update</button>
-            </div>
-        </form>
 
+                <div class="d-flex justify-content-center align-items-center gap-3 mb-4">
+                    <label class="form-check-label fw-semibold text-success">✔ Mark as Completed</label>
+                    <div class="form-check form-switch">
+                        {{ task_edit_form.completed }}
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-center gap-3">
+                    <button type="submit" class="btn btn-success fw-bold shadow-sm">✔ Save Changes</button>
+                    <a href="{% url 'index' %}" class="btn btn-outline-secondary fw-bold shadow-sm">🔙 Cancel</a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
+<!-- Form Validation Script -->
+<script>
+    document.getElementById('updateTaskForm').addEventListener('submit', function(event) {
+        let taskTitle = document.querySelector('[name="title"]');
+        
+        if (!taskTitle.value.trim()) {
+            taskTitle.classList.add('is-invalid');
+            event.preventDefault();
+        } else {
+            taskTitle.classList.remove('is-invalid');
+        }
+    });
+</script>
 {% endblock content %}
