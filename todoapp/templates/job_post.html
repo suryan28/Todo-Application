@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %} Job Search {% endblock title %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-header text-white text-center py-3" style="background: linear-gradient(135deg, #007bff, #0056b3);">
+            <h2 class="mb-0 fw-bold">Find Your Dream Job 🚀</h2>
+            <p class="mb-0 text-light">Enter your details and start searching!</p>
+        </div>
+        <div class="card-body">
+            <form method="post" class="row g-3">
+                {% csrf_token %}
+                
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Job Title</label>
+                    <input type="text" name="search_term" class="form-control" placeholder="E.g., Python Developer" required>
+                </div>
+                
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Location</label>
+                    <input type="text" name="location" class="form-control" placeholder="E.g., India" required>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Results Wanted</label>
+                    <input type="number" name="results_wanted" class="form-control" value="50" min="1">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Posted in Last (Hours)</label>
+                    <input type="number" name="hours_old" class="form-control" value="72" min="1">
+                </div>
+
+                <div class="col-md-12">
+                    <button type="submit" class="btn btn-primary w-100 fw-bold">🔍 Find Jobs</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if jobs %}
+    <div class="card mt-4 p-3">
+        <h4 class="text-center">Job Listings</h4>
+        <ul class="list-group">
+            {% for job in jobs %}
+            <li class="list-group-item">
+                <h5 class="fw-bold">{{ job.title }}</h5>
+                <p class="mb-1"><strong>Company:</strong> {{ job.company }}</p>
+                <p class="mb-1"><strong>Location:</strong> {{ job.location }}</p>
+                <p class="mb-1"><strong>Date Posted:</strong> {{ job.date_posted }}</p>
+                <a href="{{ job.job_url }}" target="_blank" class="btn btn-sm btn-info">View Job</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+{% endblock content %}
