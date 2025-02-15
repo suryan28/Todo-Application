@@ -79,37 +79,37 @@ def delete_task(request, pk):
     return redirect("index")
 
 
-from jobspy import scrape_jobs
+# from jobspy import scrape_jobs
 
-@login_required
-def job_post(request):
-    jobs = []
+# @login_required
+# def job_post(request):
+#     jobs = []
     
-    if request.method == "POST":
-        search_term = request.POST.get("search_term")
-        location = request.POST.get("location")
-        results_wanted = int(request.POST.get("results_wanted", 25))
-        hours_old = int(request.POST.get("hours_old", 72))
+#     if request.method == "POST":
+#         search_term = request.POST.get("search_term")
+#         location = request.POST.get("location")
+#         results_wanted = int(request.POST.get("results_wanted", 25))
+#         hours_old = int(request.POST.get("hours_old", 72))
 
-        job_results = scrape_jobs(
-            site_name=["linkedin"],
-            search_term=search_term,
-            location=location,
-            results_wanted=results_wanted,
-            hours_old=hours_old,
-            country_indeed="India"
-        )
+#         job_results = scrape_jobs(
+#             site_name=["linkedin"],
+#             search_term=search_term,
+#             location=location,
+#             results_wanted=results_wanted,
+#             hours_old=hours_old,
+#             country_indeed="India"
+#         )
 
-        # Filter only required columns
-        jobs = [
-            {
-                "job_url": job["job_url"],
-                "title": job["title"],
-                "company": job["company"],
-                "location": job["location"],
-                "date_posted": job["date_posted"],
-            }
-            for job in job_results.to_dict(orient="records")
-        ]
+#         # Filter only required columns
+#         jobs = [
+#             {
+#                 "job_url": job["job_url"],
+#                 "title": job["title"],
+#                 "company": job["company"],
+#                 "location": job["location"],
+#                 "date_posted": job["date_posted"],
+#             }
+#             for job in job_results.to_dict(orient="records")
+#         ]
 
-    return render(request, "job_post.html", {"jobs": jobs})
+#     return render(request, "job_post.html", {"jobs": jobs})
