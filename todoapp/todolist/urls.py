@@ -8,6 +8,10 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path("update/<int:pk>/", views.update_task, name="update_task"),
     path("delete/<int:pk>/", views.delete_task, name="delete_task"),
-    # path("job-post/", views.job_post, name="job_post")
+    path("job-post/", views.job_post, name="job_post"),
+    path("save-job/", views.save_job, name="save_job"),
+    path("saved-jobs/", views.saved_jobs, name="saved_jobs"),
+    path("remove-job/<int:job_id>/", views.remove_job, name="remove_job"),
+
 
 ]

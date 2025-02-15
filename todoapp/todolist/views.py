@@ -1,12 +1,14 @@
-from django.shortcuts import render, HttpResponse, redirect
+from django.shortcuts import render, HttpResponse, redirect, get_object_or_404
 from .forms import TaskForm
-from . models import Task, User
+from . models import Task, User, SavedJob
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from .forms import CustomRegistrationForm
 from django.forms.utils import ErrorDict
-
+from django.http import JsonResponse
+import requests
+from datetime import datetime, timedelta
 
 def register(request):
     if request.method == 'POST':
@@ -80,7 +82,7 @@ def delete_task(request, pk):
 
 
 # from jobspy import scrape_jobs
-
+# from jobspy import Site
 # @login_required
 # def job_post(request):
 #     jobs = []
@@ -90,9 +92,8 @@ def delete_task(request, pk):
 #         location = request.POST.get("location")
 #         results_wanted = int(request.POST.get("results_wanted", 25))
 #         hours_old = int(request.POST.get("hours_old", 72))
-
 #         job_results = scrape_jobs(
-#             site_name=["linkedin"],
+#             site_name=[site.name for site in Site],
 #             search_term=search_term,
 #             location=location,
 #             results_wanted=results_wanted,
@@ -113,3 +114,80 @@ def delete_task(request, pk):
 #         ]
 
 #     return render(request, "job_post.html", {"jobs": jobs})
+
+
+
+@login_required
+def job_post(request):
+    jobs = []
+
+    if request.method == "POST":
+        search_term = request.POST.get("search_term")
+        location = request.POST.get("location")
+        results_wanted = int(request.POST.get("results_wanted", 25))
+        hours_old = int(request.POST.get("hours_old", 72))
+        url = "https://jsearch.p.rapidapi.com/search"
+        params = {
+            "query": f"{search_term} in {location}",
+            "country":"IN",
+            "num_pages": (results_wanted // 10) + 1  # JSearch returns 10 results per page
+        }
+
+        headers = {
+            "X-RapidAPI-Key": "1be6a49f5amsh74e11843fcdd1abp199396jsn1e7e53319589",
+            "X-RapidAPI-Host": "jsearch.p.rapidapi.com"
+        }
+
+        response = requests.get(url, headers=headers, params=params)
+        if response.status_code == 200:
+            job_results = response.json().get("data", [])
+
+            jobs = [
+                {
+                    "job_url": job.get("job_apply_link", "#"),
+                    "title": job.get("job_title", "No Title"),
+                    "company": job.get("employer_name", "No Company"),
+                    "location":  f"{job.get('job_city', '')}, {job.get('job_state', '')}, {job.get('job_country', '')}".strip(", "),
+                    "date_posted": job.get("job_posted_at", "No Date"),
+                }
+                for job in job_results[:results_wanted]  # Limit results
+            ]
+
+    return render(request, "job_post.html", {"jobs": jobs})
+
+@login_required
+def save_job(request):
+    if request.method == "POST":
+        title = request.POST.get("title")
+        company = request.POST.get("company")
+        location = request.POST.get("location")
+        date_posted = request.POST.get("date_posted")
+        job_url = request.POST.get("job_url")
+
+        # Check if the job is already saved
+        job, created = SavedJob.objects.get_or_create(
+            title=title,
+            company=company,
+            location=location,
+            date_posted=date_posted,
+            job_url=job_url,
+            user=request.user,
+        )
+
+        return JsonResponse({"saved": created})  # Send response if job is saved
+
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
+@login_required
+def saved_jobs(request):
+    jobs = SavedJob.objects.filter(user=request.user).order_by("-created")
+    return render(request, "saved_jobs.html", {"jobs": jobs})
+
+@login_required
+def remove_job(request, job_id):
+    if request.method == "POST":
+        job = SavedJob.objects.filter(id=job_id, user=request.user).first()
+        if job:
+            job.delete()
+            return JsonResponse({"success": True})
+    return JsonResponse({"success": False}, status=400)

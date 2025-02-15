@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 
 {% block title %} Job Search {% endblock title %}
-
 {% block content %}
 <div class="container mt-5">
     <div class="card shadow-lg border-0 rounded-4">
@@ -12,12 +11,12 @@
         <div class="card-body">
             <form method="post" class="row g-3">
                 {% csrf_token %}
-                
+
                 <div class="col-md-6">
                     <label class="form-label fw-semibold">Job Title</label>
                     <input type="text" name="search_term" class="form-control" placeholder="E.g., Python Developer" required>
                 </div>
-                
+
                 <div class="col-md-6">
                     <label class="form-label fw-semibold">Location</label>
                     <input type="text" name="location" class="form-control" placeholder="E.g., India" required>
@@ -44,44 +43,116 @@
                         <p class="mt-2">Fetching jobs, please wait...</p>
                     </div>
                 </div>
-                
             </form>
         </div>
     </div>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const form = document.querySelector("form");
-            const searchBtn = document.getElementById("search-btn");
-            const loader = document.getElementById("loader");
-    
-            form.addEventListener("submit", function (event) {
-                event.preventDefault(); // Prevents immediate page reload
-                
-                // Show loader and disable button
-                searchBtn.disabled = true;
-                loader.classList.remove("d-none");
-    
-                // Submit the form after a small delay to allow UI changes
-                setTimeout(() => form.submit(), 500);
-            });
-        });
-    </script>
 
     {% if jobs %}
-    <div class="card mt-4 p-3">
-        <h4 class="text-center">Job Listings</h4>
-        <ul class="list-group">
+    <div class="mt-4">
+        <h4 class="text-center fw-bold mb-3">Job Listings</h4>
+        <div class="row">
             {% for job in jobs %}
-            <li class="list-group-item">
-                <h5 class="fw-bold">{{ job.title }}</h5>
-                <p class="mb-1"><strong>Company:</strong> {{ job.company }}</p>
-                <p class="mb-1"><strong>Location:</strong> {{ job.location }}</p>
-                <p class="mb-1"><strong>Date Posted:</strong> {{ job.date_posted }}</p>
-                <a href="{{ job.job_url }}" target="_blank" class="btn btn-sm btn-info">View Job</a>
-            </li>
+            <div class="col-lg-4 col-md-6 col-sm-12">
+                <div class="card job-card shadow-sm border-0 mb-4">
+                    <div class="card-body">
+                        <h5 class="fw-bold text-primary">{{ job.title }}</h5>
+                        <p class="mb-1"><strong>🏢 Company:</strong> {{ job.company }}</p>
+                        <p class="mb-1"><strong>📍 Location:</strong> {{ job.location }}</p>
+                        <p class="mb-1"><strong>📅 Date Posted:</strong> {{ job.date_posted }}</p>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <a href="{{ job.job_url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                🔗 View Job
+                            </a>
+                            <button class="btn btn-sm btn-success save-job" data-title="{{ job.title }}"
+                                data-company="{{ job.company }}" data-location="{{ job.location }}"
+                                data-date_posted="{{ job.date_posted }}" data-job_url="{{ job.job_url }}">
+                                💾 Save Job
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
             {% endfor %}
-        </ul>
+        </div>
     </div>
     {% endif %}
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchBtn = document.getElementById("search-btn");
+        const loader = document.getElementById("loader");
+
+        document.querySelector("form").addEventListener("submit", function (event) {
+            event.preventDefault();
+            searchBtn.disabled = true;
+            loader.classList.remove("d-none");
+            setTimeout(() => this.submit(), 500);
+        });
+
+        // Save Job Without Reloading
+        document.querySelectorAll(".save-job").forEach(button => {
+            button.addEventListener("click", function () {
+                const btn = this;
+                const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                fetch("{% url 'save_job' %}", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": csrftoken,
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: new URLSearchParams({
+                        "title": btn.getAttribute("data-title"),
+                        "company": btn.getAttribute("data-company"),
+                        "location": btn.getAttribute("data-location"),
+                        "date_posted": btn.getAttribute("data-date_posted"),
+                        "job_url": btn.getAttribute("data-job_url")
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.saved) {
+                        btn.classList.remove("btn-success");
+                        btn.classList.add("btn-secondary");
+                        btn.innerHTML = "✅ Saved";
+                        btn.disabled = true;
+
+                        
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+            });
+        });
+    });
+</script>
+
+<style>
+/* 🎨 Improved Job Card Design */
+.job-card {
+    transition: all 0.3s ease-in-out;
+    border-left: 5px solid #007bff;
+    border-radius: 10px;
+    padding: 15px;
+    background: #fff;
+}
+.job-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* 📏 Better Spacing & Layout */
+.container {
+    max-width: 900px;
+}
+
+/* 📱 Mobile-Friendly Adjustments */
+@media (max-width: 768px) {
+    .job-card {
+        border-left: 3px solid #007bff;
+    }
+}
+</style>
+
 {% endblock content %}
