@@ -1,4 +1,4 @@
-# Django Todo Application
+# Django Todo Application (GetItDone)
 
 ## Introduction
 
@@ -9,6 +9,9 @@ This is a simple Todo application built using Django, a high-level Python web fr
 - **User authentication:** Users can register for an account and log in securely.
 - **Task management:** Users can create, update, and delete tasks.
 - **Responsive design:** The application is designed to work seamlessly across different devices.
+- **Try out** https://suryan2820.pythonanywhere.com/
+
+https://github.com/user-attachments/assets/c73836ec-1c59-4e15-803e-2855a49ba098
 
 ## Technologies Used
 
@@ -58,5 +61,4 @@ This is a simple Todo application built using Django, a high-level Python web fr
 4. **Update or delete** existing tasks using the provided options.
 5. **Log out** when you're done using the application.
    
-![Screenshot 2025-02-14 004626](https://github.com/user-attachments/assets/26da836b-003c-492c-b2c4-e331a92eb19c)
 
