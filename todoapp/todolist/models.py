@@ -11,7 +11,7 @@ class Task(models.Model):
 
     
     def __str__(self):
-        self.title
+        return self.title
 
 class SavedJob(models.Model):
     title = models.CharField(max_length=350)
