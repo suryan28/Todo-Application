@@ -46,19 +46,23 @@ def logout_view(request):
     logout(request)
     return redirect('login')  
 
-@login_required
+
 def index(request):
+    form = TaskForm()
     if request.method == "POST":
+        if not request.user.is_authenticated:
+            return redirect("login")  # Redirect only when adding a task
+
         form = TaskForm(request.POST or None, user=request.user)
         if form.is_valid():
             task = form.save(commit=False)
-            task.user = request.user  # Associate task with current user
+            task.user = request.user
             task.save()
             return redirect("index")
-    else:
-        form = TaskForm()
-    tasks = Task.objects.filter(user=request.user)  # Fetch tasks associated with current user
+
+    tasks = Task.objects.filter(user=request.user) if request.user.is_authenticated else []
     return render(request, "index.html", {"task_form": form, "tasks": tasks})
+
 
 @login_required
 def update_task(request, pk):
@@ -73,6 +77,7 @@ def update_task(request, pk):
         form = TaskForm(instance=task)
 
     return render(request, "update_task.html", {"task_edit_form": form})
+
 
 @login_required
 def delete_task(request, pk):
@@ -117,7 +122,6 @@ def delete_task(request, pk):
 
 
 
-@login_required
 def job_post(request):
     jobs = []
 
@@ -155,8 +159,10 @@ def job_post(request):
 
     return render(request, "job_post.html", {"jobs": jobs})
 
-@login_required
 def save_job(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"redirect": "/login/"})  # Tell frontend to redirect
+
     if request.method == "POST":
         title = request.POST.get("title")
         company = request.POST.get("company")

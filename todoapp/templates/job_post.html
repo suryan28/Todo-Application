@@ -2,6 +2,8 @@
 
 {% block title %} Job Search {% endblock title %}
 {% block content %}
+<input type="hidden" id="isAuthenticated" value="{{ request.user.is_authenticated|yesno:'true,false' }}">
+
 <div class="container mt-5">
     <div class="card shadow-lg border-0 rounded-4">
         <div class="card-header text-white text-center py-3" style="background: linear-gradient(135deg, #007bff, #0056b3);">
@@ -80,52 +82,60 @@
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const searchBtn = document.getElementById("search-btn");
-        const loader = document.getElementById("loader");
+   document.addEventListener("DOMContentLoaded", function () {
+    const searchBtn = document.getElementById("search-btn");
+    const loader = document.getElementById("loader");
 
-        document.querySelector("form").addEventListener("submit", function (event) {
-            event.preventDefault();
-            searchBtn.disabled = true;
-            loader.classList.remove("d-none");
-            setTimeout(() => this.submit(), 500);
-        });
+    document.querySelector("form").addEventListener("submit", function (event) {
+        event.preventDefault();
+        searchBtn.disabled = true;
+        loader.classList.remove("d-none");
+        setTimeout(() => this.submit(), 500);
+    });
 
-        // Save Job Without Reloading
-        document.querySelectorAll(".save-job").forEach(button => {
-            button.addEventListener("click", function () {
-                const btn = this;
-                const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    // Get authentication status
+    const isAuthenticated = document.getElementById("isAuthenticated").value === "true";
 
-                fetch("{% url 'save_job' %}", {
-                    method: "POST",
-                    headers: {
-                        "X-CSRFToken": csrftoken,
-                        "Content-Type": "application/x-www-form-urlencoded"
-                    },
-                    body: new URLSearchParams({
-                        "title": btn.getAttribute("data-title"),
-                        "company": btn.getAttribute("data-company"),
-                        "location": btn.getAttribute("data-location"),
-                        "date_posted": btn.getAttribute("data-date_posted"),
-                        "job_url": btn.getAttribute("data-job_url")
-                    })
+    // Save Job Functionality
+    document.querySelectorAll(".save-job").forEach(button => {
+        button.addEventListener("click", function () {
+            if (!isAuthenticated) {
+                // Redirect to login page if not authenticated
+                window.location.href = "{% url 'login' %}?next={{ request.path }}";
+                return;
+            }
+
+            const btn = this;
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            fetch("{% url 'save_job' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrftoken,
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: new URLSearchParams({
+                    "title": btn.getAttribute("data-title"),
+                    "company": btn.getAttribute("data-company"),
+                    "location": btn.getAttribute("data-location"),
+                    "date_posted": btn.getAttribute("data-date_posted"),
+                    "job_url": btn.getAttribute("data-job_url")
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.saved) {
-                        btn.classList.remove("btn-success");
-                        btn.classList.add("btn-secondary");
-                        btn.innerHTML = "✅ Saved";
-                        btn.disabled = true;
-
-                        
-                    }
-                })
-                .catch(error => console.error("Error:", error));
-            });
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.saved) {
+                    btn.classList.remove("btn-success");
+                    btn.classList.add("btn-secondary");
+                    btn.innerHTML = "✅ Saved";
+                    btn.disabled = true;
+                }
+            })
+            .catch(error => console.error("Error:", error));
         });
     });
+});
+
 </script>
 
 <style>
